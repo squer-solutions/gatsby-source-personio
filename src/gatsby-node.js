@@ -1,8 +1,6 @@
 import { select } from 'xpath';
-import { DOMParser } from 'xmldom';
+import { DOMParser } from '@xmldom/xmldom';
 import axios from 'axios';
-
-let nodeStore = [];
 
 exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
   createTypes(`
@@ -140,23 +138,4 @@ const readJobsFromXml = (xml) => {
 
 const optional = (value) => {
   return !!value ? value : null;
-};
-
-const getOrCreateNode = async (
-  { actions: { createNode }, createContentDigest, createNodeId },
-  name,
-  identifier,
-  data,
-) => {
-  return await createNode({
-    id: createNodeId(`${name}-${identifier}`),
-    ...data,
-    parent: null,
-    children: [],
-    internal: {
-      type: name,
-      content: JSON.stringify(data),
-      contentDigest: createContentDigest(data),
-    },
-  });
 };

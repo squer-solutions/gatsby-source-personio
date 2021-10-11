@@ -20,8 +20,8 @@
   "author": "Marijan Barkic <marijan@kolossal.io>",
   "license": "MIT",
   "dependencies": {
+    "@xmldom/xmldom": "^0.7.5",
     "axios": "^0.22.0",
-    "xmldom": "^0.6.0",
     "xpath": "^0.0.32"
   },
   "devDependencies": {
