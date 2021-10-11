@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-personio-xml",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Gatsby source plugin to use a Personio XML feed as a data source",
   "main": "gatsby-node.js",
   "scripts": {
