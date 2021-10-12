@@ -46,65 +46,72 @@ exports.sourceNodes = async (props, { url }) => {
     throw new Error('No Personio XML URL defined');
   }
 
-  axios.get(url).then((response) => {
-    const data = readJobsFromXml(response.data);
+  console.info(`Fetching Personio XML…`);
 
-    data.forEach((item) => {
-      createNode({
-        id: createNodeId(`personio-department-${item.department}`),
-        name: item.department,
-        positions: data
-          .filter((i) => i.department === item.department)
-          .map((i) => i.id),
-        parent: null,
-        children: [],
-        internal: {
-          type: 'PersonioDepartment',
-          contentDigest: createContentDigest(item.department),
-        },
-      });
+  await axios
+    .get(url)
+    .then((response) => {
+      console.info(`Received Personio XML`);
 
-      createNode({
-        id: createNodeId(`personio-office-${item.office}`),
-        name: item.office,
-        positions: data
-          .filter((i) => i.office === item.office)
-          .map((i) => i.id),
-        parent: null,
-        children: [],
-        internal: {
-          type: 'PersonioOffice',
-          contentDigest: createContentDigest(item.office),
-        },
-      });
+      const data = readJobsFromXml(response.data);
 
-      createNode({
-        id: createNodeId(`personio-position-${item.id}`),
-        positionId: item.id,
-        subcompany: item.subcompany,
-        office: {
-          name: item.office,
-        },
-        department: {
+      data.forEach((item) => {
+        createNode({
+          id: createNodeId(`personio-department-${item.department}`),
           name: item.department,
-        },
-        recruitingCategory: item.recruitingCategory,
-        name: item.name,
-        employmentType: item.employmentType,
-        seniority: item.seniority,
-        schedule: item.schedule,
-        yearsOfExperience: item.yearsOfExperience,
-        jobDescriptions: item.jobDescriptions,
-        parent: null,
-        children: [],
-        internal: {
-          type: 'PersonioPosition',
-          content: JSON.stringify(item),
-          contentDigest: createContentDigest(item),
-        },
+          positions: data
+            .filter((i) => i.department === item.department)
+            .map((i) => i.id),
+          parent: null,
+          children: [],
+          internal: {
+            type: 'PersonioDepartment',
+            contentDigest: createContentDigest(item.department),
+          },
+        });
+
+        createNode({
+          id: createNodeId(`personio-office-${item.office}`),
+          name: item.office,
+          positions: data
+            .filter((i) => i.office === item.office)
+            .map((i) => i.id),
+          parent: null,
+          children: [],
+          internal: {
+            type: 'PersonioOffice',
+            contentDigest: createContentDigest(item.office),
+          },
+        });
+
+        createNode({
+          id: createNodeId(`personio-position-${item.id}`),
+          positionId: item.id,
+          subcompany: item.subcompany,
+          office: {
+            name: item.office,
+          },
+          department: {
+            name: item.department,
+          },
+          recruitingCategory: item.recruitingCategory,
+          name: item.name,
+          employmentType: item.employmentType,
+          seniority: item.seniority,
+          schedule: item.schedule,
+          yearsOfExperience: item.yearsOfExperience,
+          jobDescriptions: item.jobDescriptions,
+          parent: null,
+          children: [],
+          internal: {
+            type: 'PersonioPosition',
+            content: JSON.stringify(item),
+            contentDigest: createContentDigest(item),
+          },
+        });
       });
-    });
-  });
+    })
+    .catch(() => console.error(`Fetching the Personio XML failed`));
 
   return;
 };
