@@ -11,7 +11,7 @@ exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
       office: PersonioOffice @link(from: "office.name" by: "name")
       department: PersonioDepartment @link(from: "department.name" by: "name")
       recruitingCategory: String
-      name: String
+      name: String!
       employmentType: String
       seniority: String
       schedule: String
@@ -25,12 +25,12 @@ exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
     type PersonioDepartment implements Node {
       id: ID!
       name: String!
-      positions: [PersonioPosition] @link(by: "positionId")
+      positions: [PersonioPosition!] @link(by: "positionId")
     }
     type PersonioOffice implements Node {
       id: ID!
       name: String!
-      positions: [PersonioPosition] @link(by: "positionId")
+      positions: [PersonioPosition!] @link(by: "positionId")
     }
   `);
 };
