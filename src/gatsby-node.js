@@ -25,12 +25,12 @@ exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
     type PersonioDepartment implements Node {
       id: ID!
       name: String!
-      positions: [PersonioPosition!] @link(by: "positionId")
+      positions: [PersonioPosition] @link(by: "positionId")
     }
     type PersonioOffice implements Node {
       id: ID!
       name: String!
-      positions: [PersonioPosition!] @link(by: "positionId")
+      positions: [PersonioPosition] @link(by: "positionId")
     }
   `);
 };
