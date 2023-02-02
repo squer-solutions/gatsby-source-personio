@@ -1,3 +1,6 @@
+# Fork from gatsby-source-personio-xml
+Added internationalization support.
+
 # gatsby-source-personio-xml
 
 Source plugin for pulling data into Gatsby from a Personio XML feed.
