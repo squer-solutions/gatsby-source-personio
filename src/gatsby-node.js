@@ -2,62 +2,67 @@ import { select } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import axios from 'axios';
 
-exports.createSchemaCustomization = ({ actions: { createTypes } }) => {
+exports.createSchemaCustomization = ({ actions: { createTypes } }, { locale }) => {
+  const localeUpper = firstUpper(locale);
   createTypes(`
-    type PersonioPosition implements Node {
+    type PersonioPosition${localeUpper} implements Node {
       id: ID!
       positionId: Int!
       subcompany: String
-      office: PersonioOffice @link(from: "office.name" by: "name")
-      department: PersonioDepartment @link(from: "department.name" by: "name")
+      office: PersonioOffice${localeUpper} @link(from: "office.name" by: "name")
+      department: PersonioDepartment${localeUpper} @link(from: "department.name" by: "name")
       recruitingCategory: String
       name: String!
       employmentType: String
       seniority: String
       schedule: String
       yearsOfExperience: String
-      jobDescriptions: [JobDescription]
+      jobDescriptions: [JobDescription${localeUpper}]
     }
-    type JobDescription {
+    type JobDescription${localeUpper} {
       name: String
       value: String
     }
-    type PersonioDepartment implements Node {
+    type PersonioDepartment${localeUpper} implements Node {
       id: ID!
       name: String!
-      positions: [PersonioPosition] @link(by: "positionId")
+      positions: [PersonioPosition${localeUpper}] @link(by: "positionId")
     }
-    type PersonioOffice implements Node {
+    type PersonioOffice${localeUpper} implements Node {
       id: ID!
       name: String!
-      positions: [PersonioPosition] @link(by: "positionId")
+      positions: [PersonioPosition${localeUpper}] @link(by: "positionId")
     }
   `);
 };
 
-exports.sourceNodes = async (props, { url }) => {
+exports.sourceNodes = async (props, options) => {
   const {
     actions: { createNode },
     createContentDigest,
     createNodeId,
   } = props;
+  const {url, locale} = options;
+  const localeUpper = firstUpper(locale);
 
   if (!url) {
     throw new Error('No Personio XML URL defined');
   }
 
-  console.info(`Fetching Personio XML…`);
+  console.debug(`Fetching Personio XML…`);
+
+  const localizedUrl = `${url}?language=${locale}`
 
   await axios
-    .get(url)
+    .get(localizedUrl)
     .then((response) => {
-      console.info(`Received Personio XML`);
+      console.debug(`Received Personio XML`);
 
       const data = readJobsFromXml(response.data);
 
       data.forEach((item) => {
         createNode({
-          id: createNodeId(`personio-department-${item.department}`),
+          id: createNodeId(`personio-department-${item.department}-${locale}`),
           name: item.department,
           positions: data
             .filter((i) => i.department === item.department)
@@ -65,13 +70,13 @@ exports.sourceNodes = async (props, { url }) => {
           parent: null,
           children: [],
           internal: {
-            type: 'PersonioDepartment',
+            type: `PersonioDepartment${localeUpper}`,
             contentDigest: createContentDigest(item.department),
           },
         });
 
         createNode({
-          id: createNodeId(`personio-office-${item.office}`),
+          id: createNodeId(`personio-office-${item.office}-${locale}`),
           name: item.office,
           positions: data
             .filter((i) => i.office === item.office)
@@ -79,13 +84,13 @@ exports.sourceNodes = async (props, { url }) => {
           parent: null,
           children: [],
           internal: {
-            type: 'PersonioOffice',
+            type: `PersonioOffice${localeUpper}`,
             contentDigest: createContentDigest(item.office),
           },
         });
 
         createNode({
-          id: createNodeId(`personio-position-${item.id}`),
+          id: createNodeId(`personio-position-${item.id}-${locale}`),
           positionId: item.id,
           subcompany: item.subcompany,
           office: {
@@ -104,7 +109,7 @@ exports.sourceNodes = async (props, { url }) => {
           parent: null,
           children: [],
           internal: {
-            type: 'PersonioPosition',
+            type: `PersonioPosition${localeUpper}`,
             content: JSON.stringify(item),
             contentDigest: createContentDigest(item),
           },
@@ -142,6 +147,8 @@ const readJobsFromXml = (xml) => {
     };
   });
 };
+
+const firstUpper = (value) => { return value.charAt(0).toUpperCase() + value.slice(1)};
 
 const optional = (value) => {
   return !!value ? value : null;
